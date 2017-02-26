@@ -22,7 +22,7 @@ digits58 = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
 
 
 def decode_base58(bc, length):
-    print(bc)
+    #print(bc)
     n = 0
     for char in bc:
         n = n * 58 + digits58.index(str(char))
@@ -34,15 +34,20 @@ def check_bc(bc):
     bcbytes = decode_base58(bc, 25)
     return bcbytes[-4:] == sha256(sha256(bcbytes[:-4]).digest()).digest()[:4]
 
+def test_bitcoin_validity_func():
+    print("Checking validity of some test bitcoin addresses...")
+    print("Should be True, actually is "+str(check_bc('18vaZ4K62WiL6W2Qoj9AE1cerfCHRaUW4x')))
+
+
+test_bitcoin_validity_func()
 
 class BitcoinSpider(scrapy.Spider):
     name = "bitcoin_forum"
     start_urls = [
         # 'http://bitcointalk.org',
-        # 'http://bitcointalk.org/index.php?topic=20333.0'
-        'http://bitcointalk.org/index.php'
+        'http://bitcointalk.org/index.php?topic=20333.0'
+        #'http://bitcointalk.org/index.php'
         # 'file:///home/brian/network_security/dev/tuturial/bitcointalk-0.html'
-
     ]
     allowed_domains = ["bitcointalk.org"]
     page = 0
@@ -61,16 +66,17 @@ class BitcoinSpider(scrapy.Spider):
         filename = 'found_addresses.txt'
         print ("LENGTH OF POTENTIAL MATCHES: " + str(len(potential_matches)))
 
-        with open(filename, 'wb') as f:
+        with open(filename, 'w') as f:
             for item in potential_matches:
-                f.write(item + b'\n')
                 addr_found = False
+                str_item = str(item)
                 try:
-                    addr_found = check_bc(item)
+                    addr_found = check_bc(str_item)
                 except AttributeError:
                     print("Please run with Python3!")
                     exit()
                 except ValueError:
+                    f.write('Value Error encountered on :'+str(str_item)+' and that is a '+str(type(str_item))+'\n')
                     addr_found = False
                 except TypeError:
                     print(traceback.print_exc())
