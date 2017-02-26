@@ -78,3 +78,8 @@ class BitcoinSpider(scrapy.Spider):
         yield {"url" : response.url,
                "bitcoin_addresses" : list(valid_addresses)}
 
+        next_page = response.css('.navPages ::attr(href)').extract()
+        print("NUMBER of next pages: "+str(len(next_page)))
+        for page in next_page:
+            # pg = response.urljoin(page)
+            yield scrapy.Request(page, callback=self.parse)
