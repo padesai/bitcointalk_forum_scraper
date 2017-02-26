@@ -45,7 +45,7 @@ class BitcoinSpider(scrapy.Spider):
     name = "bitcoin_forum"
     start_urls = [
         # 'http://bitcointalk.org',
-        'http://bitcointalk.org/index.php?topic=20333.0'
+        'https://bitcointalk.org/index.php?topic=20333.0'
         #'http://bitcointalk.org/index.php'
         # 'file:///home/brian/network_security/dev/tuturial/bitcointalk-0.html'
     ]
@@ -56,6 +56,20 @@ class BitcoinSpider(scrapy.Spider):
     #         yield scrapy.Request(url=url, callback=self.parse_url)
 
     def parse(self, response):
+        next_page = response.css('#bodyarea div a+ a ::attr(href)').extract_first()
+        if next_page is not None:
+            print(next_page)
+            #if (next_page[-19:] == ";prev_next=next#new"):
+            ##    page = next_page[:-19]
+            #else:
+            page = next_page
+
+            print(page)
+            yield scrapy.Request(page, callback=self.parse)
+            yield scrapy.Request(page, callback=self.parse_thread)
+
+
+    def parse_thread(self, response):
         potential_matches = find_bitcoin_addr(response.body)
         valid_addresses = []
         unique_matches = set(potential_matches)
@@ -75,11 +89,11 @@ class BitcoinSpider(scrapy.Spider):
             if addr_found:
                 valid_addresses.append(str_item)
 
-        yield {"url" : response.url,
-               "bitcoin_addresses" : list(valid_addresses)}
+        yield {"url": response.url,
+               "bitcoin_addresses": list(valid_addresses)}
 
         next_page = response.css('div+ table .middletext > .navPages ::attr(href)').extract()
-        print("NUMBER of next pages: "+str(len(next_page)))
+        print("NUMBER of next pages: " + str(len(next_page)))
         for page in next_page:
             # pg = response.urljoin(page)
-            yield scrapy.Request(page, callback=self.parse)
+            yield scrapy.Request(page, callback=self.parse_thread)
