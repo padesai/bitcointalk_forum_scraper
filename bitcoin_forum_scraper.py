@@ -45,15 +45,25 @@ class BitcoinSpider(scrapy.Spider):
     name = "bitcoin_forum"
     start_urls = [
         # 'http://bitcointalk.org',
-        'https://bitcointalk.org/index.php?topic=1737478.20'
-        #'http://bitcointalk.org/index.php'
-        # 'file:///home/brian/network_security/dev/tuturial/bitcointalk-0.html'
-    ]
+        'https://bitcointalk.org/index.php?topic=1502768.0'
+       ]
     allowed_domains = ["bitcointalk.org"]
     page = 0
 
     #     for url in start_urls:
     #         yield scrapy.Request(url=url, callback=self.parse_url)
+
+    # def parse(self, response):
+    #     next_page = response.css('#bodyarea div a+ a ::attr(href)').extract_first()
+    #     if next_page is not None:
+    #         print(next_page)
+    #         #if (next_page[-19:] == ";prev_next=next#new"):
+    #         ##    page = next_page[:-19]
+    #         #else:
+    #         page = next_page
+    #         print(page)
+    #         # yield scrapy.Request(page, callback=self.parse)
+    #         yield scrapy.Request(page, callback=self.parse_thread)
 
     def parse(self, response):
         potential_matches = find_bitcoin_addr(response.body)
@@ -74,17 +84,24 @@ class BitcoinSpider(scrapy.Spider):
             if addr_found:
                 valid_addresses.append(str_item)
 
-        yield {"url" : response.url,
-               "bitcoin_addresses" : list(valid_addresses)}
-
+        
+        yield {"url": response.url,
+               "bitcoin_addresses": list(valid_addresses)}
 
         #.poster_info b a' is the css selector for a url to the poster's profile
 
         next_page = response.css('div+ table .middletext > .navPages ::attr(href)').extract()
         for page in next_page:
-            # pg = response.urljoin(page)
             yield scrapy.Request(page, callback=self.parse)
 
-       
-
+        # next_page = response.css('#bodyarea div a+ a ::attr(href)').extract_first()
+        
+        # if next_page is not None:
+        #     #if (next_page[-19:] == ";prev_next=next#new"):
+        #     ##    page = next_page[:-19]
+        #     #else:
+        #     page = next_page
+        #     print(page)
+        #     # yield scrapy.Request(page, callback=self.parse)
+        #     yield scrapy.Request(page, callback=self.parse)
 
