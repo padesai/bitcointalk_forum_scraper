@@ -2,13 +2,15 @@ from scrapy.linkextractors import LinkExtractor
 import scrapy
 import re
 from hashlib import sha256
+import traceback
 
 #takes in a string and returns all potential bitcoin addresses in a list
 def find_bitcoin_addr(text):
     #Below regular expression should do the trick. Modified from the Bitcoin Transaction Analysis Graph Paper. 
     #(https://arxiv.org/pdf/1502.01657.pdf)
     #We need to support multisig bitcoin addresses that have a 3 in front of them. https://en.bitcoin.it/wiki/Address
-    match = re.findall(r"[13].{26,33}", text)
+    match = re.findall(b"[13].[a-zA-z0-9]{26,33}", text)
+
     if match:
         return match
     else: 
@@ -17,9 +19,11 @@ def find_bitcoin_addr(text):
 digits58 = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
  
 def decode_base58(bc, length):
+    print( bc)
     n = 0
     for char in bc:
-        n = n * 58 + digits58.index(char)
+        n = n * 58 + digits58.index(str(char))
+        # n = n * 58 + 10
     return n.to_bytes(length, 'big')
 def check_bc(bc):
     bcbytes = decode_base58(bc, 25)
@@ -30,8 +34,9 @@ class BitcoinSpider(scrapy.Spider):
     name = "bitcoin_forum"
     start_urls = [
             # 'http://bitcointalk.org',
-            # 'http://bitcointalk.org/index.php?topic=20333.0'
-            'file:///home/brian/network_security/dev/tuturial/bitcointalk-0.html'
+            #'http://bitcointalk.org/index.php?topic=20333.0'
+            'http://bitcointalk.org/index.php'
+            # 'file:///home/brian/network_security/dev/tuturial/bitcointalk-0.html'
 
         ]
     allowed_domains = ["bitcointalk.org"]
@@ -48,18 +53,22 @@ class BitcoinSpider(scrapy.Spider):
         # self.page = self.page +1
         
         potential_matches = find_bitcoin_addr(response.body)
-        print "LENGTH OF POTENTIAL MATCHES: "+str(len(potential_matches))
         filename = 'found_addresses.txt'
+        print ("LENGTH OF POTENTIAL MATCHES: "+str(len(potential_matches)))
+        
         with open(filename,'wb') as f:
             for item in potential_matches:
+                f.write(item+b'\n')
+                addr_found = False
                 try:
                     addr_found = check_bc(item)
                 except AttributeError:
-                    print "Please run with Python3!"
+                    print("Please run with Python3!")
                     exit()
                 except ValueError:
                     addr_found = False
-                
+                except TypeError:
+                    print(traceback.print_exc())
                 if addr_found:
                     f.write(item)
             
