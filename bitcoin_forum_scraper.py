@@ -78,8 +78,10 @@ class BitcoinSpider(scrapy.Spider):
         yield {"url" : response.url,
                "bitcoin_addresses" : list(valid_addresses)}
 
+
         #.poster_info b a' is the css selector for a url to the poster's profile
-        next_page = response.css('.navPages ::attr(href)').extract()
+
+        next_page = response.css('div+ table .middletext > .navPages ::attr(href)').extract()
         for page in next_page:
             # pg = response.urljoin(page)
             yield scrapy.Request(page, callback=self.parse)
