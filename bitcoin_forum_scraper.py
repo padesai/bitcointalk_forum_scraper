@@ -10,7 +10,7 @@ def find_bitcoin_addr(text):
     # Below regular expression should do the trick. Modified from the Bitcoin Transaction Analysis Graph Paper.
     # (https://arxiv.org/pdf/1502.01657.pdf)
     # We need to support multisig bitcoin addresses that have a 3 in front of them. https://en.bitcoin.it/wiki/Address
-    match = re.findall(b"[13].[a-zA-Z1-9]{26,33}", text)
+    match = re.findall(b"[13].[a-km-zA-HJ-NP-Z1-9]{26,33}", text)
 
     if match:
         return match
@@ -61,25 +61,45 @@ class BitcoinSpider(scrapy.Spider):
         #     f.write(response.body)
         # self.log('Saved file %s' % filename)
         # self.page = self.page +1
-
         potential_matches = find_bitcoin_addr(response.body)
-        filename = 'found_addresses.txt'
+        #filename = 'found_addresses.txt'
         print ("LENGTH OF POTENTIAL MATCHES: " + str(len(potential_matches)))
 
-        with open(filename, 'w') as f:
-            for item in potential_matches:
+        # with open(filename, 'w') as f:
+        #     for item in potential_matches:
+        #         addr_found = False
+        #         str_item = item.decode("utf-8")
+        #         # f.write("this is the str_item: "+str_item)
+        #         try:
+        #             addr_found = check_bc(str_item)
+        #         except AttributeError:
+        #             print("Please run with Python3!")
+        #             exit()
+        #         except ValueError:
+        #             f.write('Value Error encountered on :'+str(str_item)+' and that is a '+str(type(str_item))+'\n')
+        #             addr_found = False
+        #         except TypeError:
+        #             print(traceback.print_exc())
+        #         if addr_found:
+        #             f.write(str(item)+'\n')
+
+        valid_addresses = []
+        unique_matches = set(potential_matches)
+        for item in unique_matches:
+
+            addr_found = False
+            str_item = item.decode("utf-8")
+            try:
+                addr_found = check_bc(str_item)
+            except AttributeError:
+                print("Please run with Python3!")
+                exit()
+            except ValueError:
                 addr_found = False
-                str_item = item.decode("utf-8")
-                # f.write("this is the str_item: "+str_item)
-                try:
-                    addr_found = check_bc(str_item)
-                except AttributeError:
-                    print("Please run with Python3!")
-                    exit()
-                except ValueError:
-                    f.write('Value Error encountered on :'+str(str_item)+' and that is a '+str(type(str_item))+'\n')
-                    addr_found = False
-                except TypeError:
-                    print(traceback.print_exc())
-                if addr_found:
-                    f.write(str(item)+'\n')
+            except TypeError:
+                print(traceback.print_exc())
+            if addr_found:
+                valid_addresses.append(str_item)
+
+        yield {"url" : response.url,
+               "bitcoin_addresses" : list(valid_addresses)}
