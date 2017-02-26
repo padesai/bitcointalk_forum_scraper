@@ -45,7 +45,7 @@ class BitcoinSpider(scrapy.Spider):
     name = "bitcoin_forum"
     start_urls = [
         # 'http://bitcointalk.org',
-        'http://bitcointalk.org/index.php?topic=20333.0'
+        'https://bitcointalk.org/index.php?topic=1737478.20'
         #'http://bitcointalk.org/index.php'
         # 'file:///home/brian/network_security/dev/tuturial/bitcointalk-0.html'
     ]
@@ -60,7 +60,6 @@ class BitcoinSpider(scrapy.Spider):
         valid_addresses = []
         unique_matches = set(potential_matches)
         for item in unique_matches:
-
             addr_found = False
             str_item = item.decode("utf-8")
             try:
@@ -85,3 +84,7 @@ class BitcoinSpider(scrapy.Spider):
         for page in next_page:
             # pg = response.urljoin(page)
             yield scrapy.Request(page, callback=self.parse)
+
+       
+
+
