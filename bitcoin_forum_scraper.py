@@ -10,7 +10,7 @@ def find_bitcoin_addr(text):
     # Below regular expression should do the trick. Modified from the Bitcoin Transaction Analysis Graph Paper.
     # (https://arxiv.org/pdf/1502.01657.pdf)
     # We need to support multisig bitcoin addresses that have a 3 in front of them. https://en.bitcoin.it/wiki/Address
-    match = re.findall(b"[13].[a-zA-Z1-9]{26,33}", text)
+    match = re.findall(b"[13].[a-km-zA-HJ-NP-Z1-9]{26,33}", text)
 
     if match:
         return match
@@ -61,7 +61,7 @@ class BitcoinSpider(scrapy.Spider):
         #     f.write(response.body)
         # self.log('Saved file %s' % filename)
         # self.page = self.page +1
-
+        
         potential_matches = find_bitcoin_addr(response.body)
         filename = 'found_addresses.txt'
         print ("LENGTH OF POTENTIAL MATCHES: " + str(len(potential_matches)))
@@ -82,4 +82,6 @@ class BitcoinSpider(scrapy.Spider):
                 except TypeError:
                     print(traceback.print_exc())
                 if addr_found:
+                    yield{}
                     f.write(str(item)+'\n')
+                    f.write(str(response.url))
