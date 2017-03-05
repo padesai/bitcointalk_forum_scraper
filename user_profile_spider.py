@@ -9,12 +9,12 @@ class UserProfileSpider(scrapy.Spider):
     name = "user_profile_spider"
     start_urls = [
         # "https://bitcointalk.org/index.php?action=profile;u=10197",
-        "https://bitcointalk.org/index.php?topic=1074337.400"
+        "https://bitcointalk.org/index.php?topic=1783218.0;all",
+        #"https://bitcointalk.org/index.php?topic=1074337.380"
     ]
     allowed_domains = ["bitcointalk.org"]
     page = 0
-
-
+    PRINT_LOGS = True
 
     def parse_user_profile(self, response):
         # Used to find Threads on a Board Page. Will navigate to next Board Page
