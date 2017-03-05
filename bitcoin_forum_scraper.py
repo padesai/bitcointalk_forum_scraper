@@ -3,6 +3,7 @@ import scrapy
 import re
 from hashlib import sha256
 import traceback
+import itertools
 
 # Run Program with 'scrapy runspider bitcoin_forum_scraper.py -o out.json -s DOWNLOAD_DELAY=1 --nolog'
 
@@ -23,7 +24,7 @@ def find_bitcoin_addr(text):
 
 
 def decode_base58(bc, length):
-    #print(bc)
+    # print(bc)
     n = 0
     for char in bc:
         n = n * 58 + digits58.index(str(char))
@@ -75,11 +76,22 @@ class BitcoinSpider(scrapy.Spider):
         # Used to search for Bitcoins on a Thread Page. Will navigate to next Thread Page
         PRINT_LOGS = True
 
+        addresses = []
+        for comment in itertools.chain(response.css('.windowbg').extract(), response.css('windowbg2').extract()):
+            valid_addresses = collect_bitcoins(str.encode(comment))
+            if len(valid_addresses) > 0:
+                match = re.search(r'href=[\'"]?([^\'" >]+)', comment)
+                if match:
+                    addresses.append({"user_page": match.group(0)[6:], "posted_addresses": valid_addresses})
+
+        if len(addresses) > 0:
+            yield {"url": response.url, "addresses": addresses}
+
         # Outputs to the output file for each Thread Page with valid Bitcoins
-        valid_addresses = collect_bitcoins(response.body)
-        if len(valid_addresses) > 0:
-            print("parse_thread: found {} on {}.".format(valid_addresses, response.url))
-            yield {"url": response.url, "bitcoin_addresses": valid_addresses}
+        # valid_addresses = collect_bitcoins(response.body)
+        # if len(valid_addresses) > 0:
+        #    print("parse_thread: found {} on {}.".format(valid_addresses, response.url))
+        #    yield {"url": response.url, "bitcoin_addresses": valid_addresses}
 
         # Navigate to the next page in the Thread
         next_page = response.css('.prevnext .navPages ::attr(href)').extract()
