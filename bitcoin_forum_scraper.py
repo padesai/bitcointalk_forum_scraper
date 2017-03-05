@@ -38,6 +38,12 @@ class BitcoinSpider(scrapy.Spider):
         # Used to search for Bitcoins on a Thread Page. Will navigate to next Thread Page
         PRINT_LOGS = True
 
+        #Used to get every poster's profile page and bitcoin address
+        list_users = response.css('.poster_info b a::attr(href)').extract()
+        for href in list_users:
+            yield scrapy.Request(href, callback=self.parse_user_profile)
+
+
         addresses = []
         for comment in itertools.chain(response.css('.windowbg').extract(), response.css('windowbg2').extract()):
             valid_addresses = collect_bitcoins(str.encode(comment))
@@ -62,3 +68,12 @@ class BitcoinSpider(scrapy.Spider):
             yield scrapy.Request(next_page[-1], callback=self.parse_thread)
 
             # '.poster_info b a' is the css selector for a url to the poster's profile
+
+
+    def parse_user_profile(self, response):
+        # Used to find Threads on a Board Page. Will navigate to next Board Page
+        bitcoins = collect_bitcoins(response.body)
+        # print("LENGTH OF LIST: "+str(len(bitcoins)))
+        if len(bitcoins)>0:
+            user_id = response.css('.windowbg tr:nth-child(1) td:nth-child(2)::text').extract_first()
+            yield {"user_id": user_id, "Profile URL": response.url, "bitcoin_addresses": bitcoins}
