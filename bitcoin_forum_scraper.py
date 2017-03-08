@@ -21,7 +21,7 @@ class BitcoinSpider(scrapy.Spider):
 
     def parse(self, response):
         # Used to find Threads on a Board Page. Will navigate to next Board Page
-        PRINT_LOGS = True
+        PRINT_LOGS = False
 
         # Navigate to each Thread on the Board Page
         for href in response.css('.leftimg+ td span a ::attr(href)').extract():
@@ -36,7 +36,7 @@ class BitcoinSpider(scrapy.Spider):
 
     def parse_thread(self, response):
         # Used to search for Bitcoins on a Thread Page. Will navigate to next Thread Page
-        PRINT_LOGS = True
+        PRINT_LOGS = False
 
         #Used to get every poster's profile page and bitcoin address
         list_users = response.css('.poster_info b a::attr(href)').extract()
@@ -44,16 +44,16 @@ class BitcoinSpider(scrapy.Spider):
             yield scrapy.Request(href, callback=self.parse_user_profile)
 
 
-        addresses = []
+        #addresses = []
         for comment in itertools.chain(response.css('.windowbg').extract(), response.css('windowbg2').extract()):
             valid_addresses = collect_bitcoins(str.encode(comment))
             if len(valid_addresses) > 0:
                 match = re.search(r'href=[\'"]?([^\'" >]+)', comment)
                 if match:
-                    addresses.append({"user_page": match.group(0)[6:], "posted_addresses": valid_addresses})
+                    yield {"comment_url": response.url, "profile_url": match.group(0)[6:], "bitcoin_addresses": valid_addresses, "comment_text": comment}
 
-        if len(addresses) > 0:
-            yield {"url": response.url, "addresses": addresses}
+        # if len(addresses) > 0:
+        #     yield {"url": response.url, "addresses": addresses}
 
         # Outputs to the output file for each Thread Page with valid Bitcoins
         # valid_addresses = collect_bitcoins(response.body)
