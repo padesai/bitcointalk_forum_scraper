@@ -1,8 +1,11 @@
 import json
 from pprint import pprint
 import mysql.connector
+import mysql
 import traceback
-
+import sys
+import string
+import _mysql_connector
 
 def readConfigFile(config_file):
 #reads the config file and returns an array of relevant values
@@ -22,6 +25,12 @@ username = configValues[0]
 user_pass = configValues[1]
 
 
+
+
+ccnx = _mysql_connector.MySQL()
+ccnx.connect(user=username, password=user_pass,
+                              host='127.0.0.1',
+                              database='bitcoin_forum_scraping')
 
 
 #connect to the mysql database
@@ -75,14 +84,55 @@ def add_user_bitcoins():
 	      	
 def add_user_comments():
 	with open('out.json', 'r') as user_comments:
+		count =0
+		cursor = cnx.cursor(buffered=True)
 		data = json.load(user_comments)
+
 		for line in data:
-			data = json.load(line)
-		print data
+			if 'comment_text' in line:
+				try: 
+					parsed_profile_url = line['profile_url']
+					get_user_fk_sql = "Select id from user_profiles where profile_url = '%s'" %parsed_profile_url
+					count = count+1
+					cursor.execute(get_user_fk_sql)
+					res = cursor.fetchone()
+					user_id = ''
+					# if res:
+					user_id = res[0]
+					# else:
+					# 	add_prof_url_sql = "INSERT IGNORE INTO user_profiles (profile_url) VALUES ('%s')"%(parsed_profile_url)
+					# 	cursor.execute(add_prof_url_sql)
+		   #  			cnx.commit()
+		   #  			get_last_insert_sql = "SELECT LAST_INSERT_ID()"
+		   #  			cursor.execute(get_last_insert_sql)
+		   #  			user_id = cursor.fetchone()[0]
+					
+					comment_url = line['comment_url']
+					comment_text = line['comment_text']
+					printable = set(string.printable)
+					comment_text = filter(lambda x: x in printable, comment_text)
+					sql = "INSERT IGNORE INTO user_comments (user_profile_id,comment_url,comment_text) VALUES ('%s','%s','%s')" % (user_id,comment_url,ccnx.escape_string(comment_text))
+					cursor.execute(sql)
+					cnx.commit()
+					if count > 100:
+						break
+				except:
+					# print "Failed user_id: "+ str(user_id)
+					# print "Failed json: "+ str(line)
+					# print "Foreign key: "+ get_user_fk_sql
+					# print "user_id should be: "+ str(res[0])	
+					# print "Failed SQL: "+ sql
+					print comment_text
+					print traceback.print_exc()
+					with open('failed.json','a') as failed:
+						failed.write(str(line)+"\n")
+					break
+		print count
 # add_user_profiles()	  
 # add_user_bitcoins() 
 add_user_comments()
 cnx.close()
+ccnx.close()
 
 
 	      	#Get the bitcoin addresses found for the scraped data
