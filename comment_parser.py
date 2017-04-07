@@ -17,12 +17,15 @@ def parse_comment(comment):
         username = "Failed_to_parse_the_username"
 
     try:
-        post = soup.find_all("div", class_="post")[0].get_text()
+        # post = soup.find_all("div", class_="post")[0].get_text()
+        post = soup.find_all("div", class_="post")[0]
     except:
         post = ""
 
     try:
-        signature = soup.find_all("div", class_="signature")[0].get_text()
+        # signature = soup.find_all("div", class_="signature")[0].get_text()
+        signature = soup.find_all("div", class_="signature")[0]
+
     except:
         signature = ""
 
@@ -34,11 +37,12 @@ def parse_comment(comment):
         except:
             pass
 
-    output = {"comment": {"post": post, "signature": signature}, "date": str(post_date), "username": username,
-              "profile_url": profile_url}
+    output = {"comment": {"post": str(post), "signature": str(signature)}, "date": str(post_date), "username": username,
+              "profile_url": str(profile_url)}
 
     return output
 
 
 if __name__ == "__main__":
-    print parse_comment(test_comment2)
+    # print parse_comment(test_comment2)
+    pass
