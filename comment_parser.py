@@ -10,8 +10,10 @@ def parse_comment(comment):
     # Tries to parse a stored comment from the web crawler
     soup = BeautifulSoup(comment, "html.parser")
     try:
+        profile_url = soup.a['href']
         username = soup.a.get_text()
     except:
+        profile_url = "Failed_to_parse_profile_url"
         username = "Failed_to_parse_the_username"
 
     try:
@@ -32,7 +34,8 @@ def parse_comment(comment):
         except:
             pass
 
-    output = {"comment": {"post": post, "signature": signature}, "date": str(post_date), "username": username}
+    output = {"comment": {"post": post, "signature": signature}, "date": str(post_date), "username": username,
+              "profile_url": profile_url}
 
     return output
 

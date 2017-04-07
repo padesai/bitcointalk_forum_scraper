@@ -16,15 +16,15 @@ def import_json(filename):
     with open(filename) as f:
         data = json.load(f)
 
-    # User keys: {"bitcoin_addresses": [], "Profile URL": "", "user_id": ""}
-    # Comment keys: {"bitcoin_addresses": [], "comment_text": "", "comment_url": "", "profile_url": ""}
+    # User keys: {"bitcoin_addresses": [], "profile_url": "", "user_id": ""}
+    # Comment keys: {"bitcoin_addresses": [], "comment_text": "", "comment_url": ""}
     parsed_users = []
     parsed_comments = []
     for elem in data:
         if elem.has_key('user_id'):
             # Is a user profile JSON element
             user = {"username": elem["user_id"], "bitcoin_addresses": elem["bitcoin_addresses"],
-                    "profile_url": elem["Profile URL"]}
+                    "profile_url": elem["profile_url"]}
             parsed_users.append(user)
 
         elif elem.has_key('comment_text'):
@@ -32,7 +32,7 @@ def import_json(filename):
             p = parse_comment(elem['comment_text'])
 
             comment = {"username": p["username"], "bitcoin_addresses": elem["bitcoin_addresses"],
-                       "profile_url": elem["profile_url"], "date": p["date"], "comment": p["comment"],
+                       "profile_url": p["profile_url"], "date": p["date"], "comment": p["comment"],
                        "comment_url": elem["comment_url"]}
             parsed_comments.append(comment)
 

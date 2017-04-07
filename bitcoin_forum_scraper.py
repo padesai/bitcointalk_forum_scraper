@@ -7,6 +7,7 @@ from bitcoin_helper import collect_bitcoins
 
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
+
 # Run Program with 'scrapy runspider bitcoin_forum_scraper.py -o out.json -s DOWNLOAD_DELAY=1 --nolog'
 
 class BitcoinSpider(scrapy.Spider):
@@ -53,17 +54,14 @@ class BitcoinSpider(scrapy.Spider):
         for comment in itertools.chain(response.css('.windowbg').extract(), response.css('windowbg2').extract()):
             valid_addresses = collect_bitcoins(str.encode(comment))
             if len(valid_addresses) > 0:
-                match = re.search(r'href=[\'"]?([^\'" >]+)', comment)
-                if match:
-                    logging.debug("Page {}, yielding a Comment".format(response.url))
-                    yield {"comment_url": response.url, "profile_url": match.group(0)[6:], "bitcoin_addresses": valid_addresses, "comment_text": comment}
+                logging.debug("Page {}, yielding a Comment".format(response.url))
+                yield {"comment_url": response.url, "bitcoin_addresses": valid_addresses, "comment_text": comment}
 
         # Navigate to the next Page in the Thread
         next_page = response.css('.prevnext .navPages ::attr(href)').extract()
         if len(next_page) > 0:
             logging.debug("Page {}, going to Page {}".format(response.url, next_page[-1]))
             yield scrapy.Request(next_page[-1], callback=self.parse_thread)
-
 
     def parse_user_profile(self, response):
         """Searches and scrapes valid Bitcoins from a User's Profile page.
@@ -74,4 +72,4 @@ class BitcoinSpider(scrapy.Spider):
         if len(bitcoins) > 0:
             user_id = response.css('.windowbg tr:nth-child(1) td:nth-child(2)::text').extract_first()
             logging.debug("User {}, yielding Bitcoins".format(response.url))
-            yield {"user_id": user_id, "Profile URL": response.url, "bitcoin_addresses": bitcoins}
+            yield {"user_id": user_id, "profile_url": response.url, "bitcoin_addresses": bitcoins}
