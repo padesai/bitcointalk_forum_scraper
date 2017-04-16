@@ -1,13 +1,12 @@
 import pymongo
 import sys
 import json
-from pprint import pprint
 from comment_parser import parse_comment
 
 
 def import_json(filename):
-    # Reads a JSON file and inserts each element into the database
-
+    """Reads a JSON file and inserts each element into the database
+    """
     mongo = pymongo.MongoClient()
     database = mongo["bitcoin_rest"]
     users = database.users

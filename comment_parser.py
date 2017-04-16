@@ -7,8 +7,11 @@ test_comment2 = u"<td class=\"windowbg\">\n\t\t\t\t<table width=\"100%\" cellpad
 
 
 def parse_comment(comment):
-    # Tries to parse a stored comment from the web crawler
+    """Tries to parse a stored comment from the web crawler of bitcointalk.org
+    """
     soup = BeautifulSoup(comment, "html.parser")
+
+    # Parse the URL and Username
     try:
         profile_url = soup.a['href']
         username = soup.a.get_text()
@@ -16,19 +19,21 @@ def parse_comment(comment):
         profile_url = "Failed_to_parse_profile_url"
         username = "Failed_to_parse_the_username"
 
+    # Parse the post
     try:
-        # post = soup.find_all("div", class_="post")[0].get_text()
+        # post = soup.find_all("div", class_="post")[0].get_text() # Just the text, not the HTML
         post = soup.find_all("div", class_="post")[0]
     except:
         post = ""
 
+    # Parse the signature
     try:
-        # signature = soup.find_all("div", class_="signature")[0].get_text()
+        # signature = soup.find_all("div", class_="signature")[0].get_text() # Just the text, not the HTML
         signature = soup.find_all("div", class_="signature")[0]
-
     except:
         signature = ""
 
+    # Parse the datetime of the post
     small_text = soup.find_all("div", class_="smalltext")
     post_date = ""
     for div in small_text:
