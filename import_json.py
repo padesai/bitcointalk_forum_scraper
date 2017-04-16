@@ -26,14 +26,17 @@ def import_json(filename):
                     "profile_url": elem["profile_url"]}
             parsed_users.append(user)
 
-        elif elem.has_key('comment_text'):
+        elif elem.has_key('comment'):
             # Is a comment JSON element
-            p = parse_comment(elem['comment_text'])
 
-            comment = {"username": p["username"], "bitcoin_addresses": elem["bitcoin_addresses"],
-                       "profile_url": p["profile_url"], "date": p["date"], "comment": p["comment"],
-                       "comment_url": elem["comment_url"]}
-            parsed_comments.append(comment)
+            # No longer needed since scraper handles this
+            # p = parse_comment(elem['comment_text'])
+            # comment = {"username": p["username"], "bitcoin_addresses": elem["bitcoin_addresses"],
+            #            "profile_url": p["profile_url"], "date": p["date"], "comment": p["comment"],
+            #            "comment_url": elem["comment_url"]}
+            # parsed_comments.append(comment)
+
+            parsed_comments.append(elem)
 
     # Add everything into the mongo db
     users.insert_many(parsed_users)
