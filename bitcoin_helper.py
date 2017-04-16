@@ -5,8 +5,9 @@ import traceback
 digits58 = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
 
 
-# takes in a string and returns all potential bitcoin addresses in a list
 def find_bitcoin_addr(text):
+    """Takes in a string and returns all potential bitcoin addresses in a list
+    """
     # Below regular expression should do the trick. Modified from the Bitcoin Transaction Analysis Graph Paper.
     # (https://arxiv.org/pdf/1502.01657.pdf)
     # We need to support multisig bitcoin addresses that have a 3 in front of them. https://en.bitcoin.it/wiki/Address
@@ -19,21 +20,24 @@ def find_bitcoin_addr(text):
 
 
 def decode_base58(bc, length):
-    #print(bc)
+    """Decodes a bitcoin address to bytes
+    """
     n = 0
     for char in bc:
         n = n * 58 + digits58.index(str(char))
-        # n = n * 58 + 10
     return n.to_bytes(length, 'big')
 
 
 def check_bc(bc):
+    """Checks if a Bitcoin address is valid or not
+    """
     bcbytes = decode_base58(bc, 25)
     return bcbytes[-4:] == sha256(sha256(bcbytes[:-4]).digest()).digest()[:4]
 
 
 def collect_bitcoins(body):
-    # Given an HTML page, returns a list of all unique, valid bitcoins on that page
+    """Given a string, returns a list of all unique, valid bitcoins in that string
+    """
     potential_matches = find_bitcoin_addr(body)
     valid_addresses = []
     unique_matches = set(potential_matches)
@@ -57,8 +61,8 @@ def collect_bitcoins(body):
 
         except OverflowError:
             addr_found = False
-            # print(traceback.print_exc())
 
+        # Add the valid address to a list of addresses
         if addr_found:
             valid_addresses.append(str_item)
 
