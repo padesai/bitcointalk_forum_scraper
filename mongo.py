@@ -82,7 +82,8 @@ def flask_overwrite_user():
 
 
 def get_all_users():
-    # Return all users and their information in the database
+    """Return all users and their information in the database
+    """
     users = mongo.db.users
 
     output = []
@@ -95,7 +96,8 @@ def get_all_users():
 
 
 def get_user_from_name(name):
-    # Return all related information of a given username
+    """Return all related information of a given username
+    """
     users = mongo.db.users
 
     q = users.find_one({'username': name})
@@ -108,7 +110,8 @@ def get_user_from_name(name):
 
 
 def get_users_from_bitcoin(address):
-    # Return all users and related information of users given a bitcoin address
+    """Return all users and related information of users given a bitcoin address
+    """
     users = mongo.db.users
 
     q = users.find({'bitcoin_addresses': address})
@@ -121,7 +124,8 @@ def get_users_from_bitcoin(address):
 
 
 def get_comments(amount):
-    # Return all comments in the database
+    """Return all comments in the database
+    """
     comments = mongo.db.comments
 
     output = []
@@ -136,7 +140,8 @@ def get_comments(amount):
 
 
 def get_comments_from_name(name):
-    # Return all comments of a given username
+    """Return all comments of a given username
+    """
     comments = mongo.db.comments
 
     q = comments.find({'username': name})
@@ -151,7 +156,8 @@ def get_comments_from_name(name):
 
 
 def get_comments_from_bitcoin(address):
-    # Return all comments including a specific bitcoin address
+    """Return all comments including a specific bitcoin address
+    """
     comments = mongo.db.comments
 
     q = comments.find({'bitcoin_addresses': address})
@@ -166,7 +172,8 @@ def get_comments_from_bitcoin(address):
 
 
 def get_all_from_name(name):
-    # Return everything for a given username
+    """Return everything for a given username
+    """
     users_result = get_user_from_name(name)['result']
     comments_result = get_comments_from_name(name)['result']
 
@@ -202,7 +209,8 @@ def get_all_from_name(name):
 
 
 def get_all_from_bitcoin(address):
-    # Return everything for a given username
+    """Return everything for a given username
+    """
     users_result = get_users_from_bitcoin(address)['result']
     comments_result = get_comments_from_bitcoin(address)['result']
 
@@ -228,7 +236,8 @@ def get_all_from_bitcoin(address):
 
 
 def add_user(username, profile_url, bitcoin_addresses):
-    # Insert a totally new user into the database
+    """Insert a totally new user into the database
+    """
     users = mongo.db.users
 
     if users.find_one({'username': username}):
@@ -247,7 +256,8 @@ def add_user(username, profile_url, bitcoin_addresses):
 
 
 def overwrite_user(username, profile_url, bitcoin_addresses):
-    # Overwrites a user's data or creates a new one if doesn't exist
+    """Overwrites a user's data or creates a new one if doesn't exist
+    """
     users = mongo.db.users
 
     replacement_user = {'profile_url': profile_url, 'username': username,
