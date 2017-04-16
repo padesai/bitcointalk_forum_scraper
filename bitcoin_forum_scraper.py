@@ -1,7 +1,6 @@
 from scrapy.linkextractors import LinkExtractor
 import scrapy
 from scrapy.spiders import SitemapSpider
-import re
 import itertools
 import logging
 from bitcoin_helper import collect_bitcoins
