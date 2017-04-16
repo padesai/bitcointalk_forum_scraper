@@ -8,6 +8,7 @@ from comment_parser import parse_comment
 
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
+
 # Run Program with 'scrapy runspider bitcoin_forum_scraper.py -o out.json -s DOWNLOAD_DELAY=1 --nolog'
 
 class BitcoinSpider(SitemapSpider):
