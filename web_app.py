@@ -184,7 +184,7 @@ def get_all_from_name(name):
         # There exists a stored user
         username = users_result['username']
         profile_url = users_result['profile_url']
-        user_addresses = users_result['user_addresses']
+        user_addresses = users_result['bitcoin_addresses']
     else:
         # No stored user, get info from comments
         username = comments_result[0]['username']
